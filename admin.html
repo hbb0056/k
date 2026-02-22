@@ -17,11 +17,16 @@
       <p>Firebase bağlantısı kurulamadı. <code>js/firebase-config.js</code> dosyasındaki değerleri kontrol edin. Siteyi <strong>dosyayı doğrudan açarak (file://)</strong> değil, <strong>bir sunucu üzerinden</strong> açın (örn. <code>npx serve .</code> veya GitHub Pages).</p>
     </div>
 
+    <div id="file-protocol-warning" class="card" style="display: none; border-color: var(--danger); background: rgba(239,68,68,0.1);">
+      <p><strong>Bu sayfa dosya olarak açılmış (file://).</strong> Katılımcıları görebilmek için siteyi bir sunucu üzerinden açın: proje klasöründe <code>npx serve .</code> yazıp çıkan adresi (örn. http://localhost:3000) kullanın. Yönetici ve katılımcı sayfaları <strong>aynı adresten</strong> açılmalı.</p>
+    </div>
+
     <!-- Katılımcılar -->
     <div class="card">
-      <h2>Katılımcılar</h2>
+      <h2>Katılımcılar <span id="participant-count" class="text-muted" style="font-size: 0.85rem; font-weight: normal;"></span></h2>
+      <p id="connection-status" class="text-muted" style="font-size: 0.85rem; margin-bottom: 0.5rem;"></p>
       <ul id="participant-list" class="list"></ul>
-      <p id="participant-empty" class="text-muted" style="display: none; padding: 0.5rem 0;">Henüz katılımcı yok.</p>
+      <p id="participant-empty" class="text-muted" style="padding: 0.5rem 0;">Henüz katılımcı yok. Katılımcılar <strong>Katılımcı Girişi</strong> sayfasından adlarını yazıp Katıl dediğinde burada listelenir.</p>
     </div>
 
     <!-- Kelime havuzu -->

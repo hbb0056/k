@@ -1,4 +1,8 @@
 (function () {
+  if (window.location.protocol === "file:") {
+    document.getElementById("file-protocol-warning").style.display = "block";
+  }
+
   if (typeof firebase === "undefined" || !firebase.apps?.length) {
     document.getElementById("firebase-warning").style.display = "block";
     return;
@@ -12,6 +16,8 @@
 
   const participantListEl = document.getElementById("participant-list");
   const participantEmptyEl = document.getElementById("participant-empty");
+  const participantCountEl = document.getElementById("participant-count");
+  const connectionStatusEl = document.getElementById("connection-status");
   const wordListEl = document.getElementById("word-list");
   const wordEmptyEl = document.getElementById("word-empty");
   const newWordInput = document.getElementById("new-word");
@@ -19,6 +25,18 @@
   const startGameBtn = document.getElementById("start-game-btn");
   const resetGameBtn = document.getElementById("reset-game-btn");
   const gameStatusEl = document.getElementById("game-status");
+
+  // Veritabanı bağlantısını test et ve katılımcıları ilk yükle
+  connectionStatusEl.textContent = "Veritabanına bağlanılıyor…";
+  participantsRef.once("value")
+    .then(function (snap) {
+      connectionStatusEl.textContent = "Veritabanı bağlı. Liste anlık güncellenir.";
+      connectionStatusEl.style.color = "var(--success)";
+    })
+    .catch(function (err) {
+      connectionStatusEl.textContent = "Bağlantı hatası: " + (err.message || err);
+      connectionStatusEl.style.color = "var(--danger)";
+    });
 
   // Başlangıçta gameState yoksa oluştur
   gameStateRef.once("value", function (snap) {
@@ -31,6 +49,9 @@
   participantsRef.on("value", function (snap) {
     const data = snap.val() || {};
     const entries = Object.entries(data);
+    if (participantCountEl) {
+      participantCountEl.textContent = "(" + entries.length + ")";
+    }
     participantListEl.innerHTML = "";
     participantEmptyEl.style.display = entries.length ? "none" : "block";
     entries.forEach(function ([id, p]) {
