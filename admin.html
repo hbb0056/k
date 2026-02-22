@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kelime Avı - Yönetici</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container">
+    <header style="margin-bottom: 1.5rem;">
+      <a href="index.html" class="btn btn-ghost" style="margin-bottom: 0.5rem;">← Ana sayfa</a>
+      <h1 style="font-size: 1.5rem;">Yönetici Paneli</h1>
+    </header>
+
+    <div id="firebase-warning" class="card" style="display: none; border-color: var(--warning);">
+      <p>Firebase bağlantısı kurulamadı. <code>js/firebase-config.js</code> dosyasındaki değerleri kontrol edin. Siteyi <strong>dosyayı doğrudan açarak (file://)</strong> değil, <strong>bir sunucu üzerinden</strong> açın (örn. <code>npx serve .</code> veya GitHub Pages).</p>
+    </div>
+
+    <!-- Katılımcılar -->
+    <div class="card">
+      <h2>Katılımcılar</h2>
+      <ul id="participant-list" class="list"></ul>
+      <p id="participant-empty" class="text-muted" style="display: none; padding: 0.5rem 0;">Henüz katılımcı yok.</p>
+    </div>
+
+    <!-- Kelime havuzu -->
+    <div class="card">
+      <h2>Kelime Havuzu</h2>
+      <div class="form-row">
+        <input type="text" id="new-word" placeholder="Yeni kelime ekle" maxlength="20">
+        <button type="button" class="btn btn-primary" id="add-word-btn">Ekle</button>
+      </div>
+      <ul id="word-list" class="list"></ul>
+      <p id="word-empty" class="text-muted" style="display: none; padding: 0.5rem 0;">Henüz kelime yok. Oyunu başlatmak için en az bir kelime ekleyin.</p>
+    </div>
+
+    <!-- Oyun kontrolü -->
+    <div class="card">
+      <h2>Oyun</h2>
+      <p id="game-status" class="text-muted" style="margin-bottom: 0.75rem;">Durum: Beklemede</p>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <button type="button" class="btn btn-success" id="start-game-btn">Oyunu Başlat</button>
+        <button type="button" class="btn btn-ghost" id="reset-game-btn">Oyunu Sıfırla</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/game-logic.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

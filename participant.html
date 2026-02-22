@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kelime Avı - Katılımcı</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container">
+    <header style="margin-bottom: 1rem;">
+      <a href="index.html" class="btn btn-ghost" style="margin-bottom: 0.5rem;">← Ana sayfa</a>
+      <h1 style="font-size: 1.5rem; margin-top: 0.5rem;">Katılımcı Girişi</h1>
+    </header>
+
+    <div id="firebase-warning" class="card" style="display: none; border-color: var(--warning);">
+      <p>Firebase yapılandırması eksik. Lütfen yönetici ile iletişime geçin.</p>
+    </div>
+
+    <!-- Başvuru ekranı - varsayılan olarak görünür -->
+    <div id="join-screen" class="card">
+      <h2>Oyuna Katıl</h2>
+      <p class="text-muted" style="margin-bottom: 1rem; font-size: 0.95rem;">Adınızı yazıp <strong>Katıl</strong> butonuna basın. Yönetici sizi onayladıktan sonra oyuna gireceksiniz.</p>
+      <div class="form-row">
+        <input type="text" id="player-name" placeholder="Adınız" maxlength="30" autocomplete="name">
+        <button type="button" class="btn btn-primary" id="join-btn">Katıl</button>
+      </div>
+    </div>
+
+    <!-- Onay bekliyor -->
+    <div id="wait-approval-screen" class="card" style="display: none;">
+      <div class="status-msg status-waiting">
+        Yönetici onayı bekleniyor. Listede görünüyorsunuz; onaylandığınızda oyun alanı açılacak.
+      </div>
+    </div>
+
+    <!-- Reddedildi / silindi -->
+    <div id="not-approved-screen" class="card" style="display: none;">
+      <div class="status-msg status-not-approved">
+        Henüz onaylanmadınız veya listeden çıkarıldınız. Tekrar katılmak için sayfayı yenileyin.
+      </div>
+    </div>
+
+    <!-- Oyun beklemede (onaylı, oyun başlamadı) -->
+    <div id="wait-game-screen" class="card" style="display: none;">
+      <div class="status-msg status-playing">
+        Onaylandınız. Yönetici oyunu başlattığında kelime avı burada görünecek.
+      </div>
+    </div>
+
+    <!-- Oyun ekranı -->
+    <div id="game-screen" style="display: none;">
+      <div class="card">
+        <h2>Kelime Avı</h2>
+        <p class="text-muted" style="margin-bottom: 0.75rem;">Harfleri tıklayarak kelimeleri işaretleyin (baştan sona veya sondan başa).</p>
+        <div class="game-wrapper">
+          <div id="word-grid-container"></div>
+        </div>
+        <div class="found-words" id="found-words"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/game-logic.js"></script>
+  <script src="js/participant.js"></script>
+</body>
+</html>
