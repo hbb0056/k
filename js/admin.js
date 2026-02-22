@@ -1,13 +1,26 @@
 (function () {
+  var statusEl = document.getElementById("connection-status");
+  function setStatus(text, isError) {
+    if (statusEl) {
+      statusEl.textContent = text;
+      statusEl.style.color = isError ? "#ef476f" : "#06d6a0";
+    }
+  }
+
   var fb = initFirebase();
   if (!fb) {
     setStatus("Firebase bağlantısı kurulamadı. Sayfayı sunucu üzerinden açın (npx serve .).", true);
+    var btnAdd = document.getElementById("btn-add-word");
+    if (btnAdd) btnAdd.addEventListener("click", function () {
+      alert("Çalışmıyor: Sayfa dosya olarak açılmış (file://).\n\nProje klasöründe terminalde \"npx serve .\" yazın, sonra tarayıcıda http://localhost:3000/admin.html açın.");
+    });
     return;
   }
 
   var db = fb.database();
   var ref = db.ref(YARISMA_REF);
-  var wordsRef = db.ref(KELIME_HAVUZU_REF);
+  var wordsPath = typeof KELIME_HAVUZU_REF !== "undefined" ? KELIME_HAVUZU_REF : "yarisma/words";
+  var wordsRef = db.ref(wordsPath);
 
   var statusEl = document.getElementById("connection-status");
   var listEl = document.getElementById("participant-list");
@@ -18,12 +31,6 @@
   var inputHint = document.getElementById("input-hint");
   var btnAddWord = document.getElementById("btn-add-word");
 
-  function setStatus(text, isError) {
-    if (statusEl) {
-      statusEl.textContent = text;
-      statusEl.style.color = isError ? "#ef476f" : "#06d6a0";
-    }
-  }
 
   ref.once("value")
     .then(function () {
@@ -101,26 +108,38 @@
   });
 
   // Kelime ekle
-  btnAddWord.addEventListener("click", addWord);
-  inputWord.addEventListener("keydown", function (e) {
-    if (e.key === "Enter") { e.preventDefault(); addWord(); }
-  });
-  inputHint.addEventListener("keydown", function (e) {
-    if (e.key === "Enter") { e.preventDefault(); addWord(); }
-  });
-
   function addWord() {
+    if (!inputWord || !wordsRef) {
+      alert("Sayfa hazır değil. Yenileyin veya sunucu üzerinden açın (npx serve .).");
+      return;
+    }
     var word = (inputWord.value || "").trim();
-    var hint = (inputHint.value || "").trim();
-    if (!word) return;
-    wordsRef.push({ word: word, hint: hint }).then(function () {
-      inputWord.value = "";
-      inputHint.value = "";
-      inputWord.focus();
-    }).catch(function (err) {
-      alert("Eklenemedi: " + (err.message || err));
-    });
+    var hint = inputHint ? (inputHint.value || "").trim() : "";
+    if (!word) {
+      alert("Lütfen en az kelimeyi yazın.");
+      return;
+    }
+    if (btnAddWord) btnAddWord.disabled = true;
+    wordsRef.push({ word: word, hint: hint })
+      .then(function () {
+        if (inputWord) inputWord.value = "";
+        if (inputHint) inputHint.value = "";
+        if (inputWord) inputWord.focus();
+        if (btnAddWord) btnAddWord.disabled = false;
+      })
+      .catch(function (err) {
+        if (btnAddWord) btnAddWord.disabled = false;
+        alert("Eklenemedi: " + (err.message || err) + "\n\nFirebase Console → Realtime Database → Kurallar: yarisma altında .write: true olmalı.");
+      });
   }
+
+  if (btnAddWord) btnAddWord.addEventListener("click", addWord);
+  if (inputWord) inputWord.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); addWord(); }
+  });
+  if (inputHint) inputHint.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); addWord(); }
+  });
 
   function escapeHtml(s) {
     var div = document.createElement("div");
