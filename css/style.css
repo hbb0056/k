@@ -77,8 +77,9 @@ input:focus {
   border-color: #4361ee;
 }
 
-.form-row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
-.form-row input { flex: 1; }
+.form-row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+.form-row input { flex: 1; min-width: 100px; }
+.form-row .btn { flex-shrink: 0; }
 
 /* Liste */
 .participant-list { list-style: none; }

@@ -7,10 +7,16 @@
 
   var db = fb.database();
   var ref = db.ref(YARISMA_REF);
+  var wordsRef = db.ref(KELIME_HAVUZU_REF);
 
   var statusEl = document.getElementById("connection-status");
   var listEl = document.getElementById("participant-list");
   var emptyEl = document.getElementById("empty-list");
+  var wordListEl = document.getElementById("word-list");
+  var emptyWordsEl = document.getElementById("empty-words");
+  var inputWord = document.getElementById("input-word");
+  var inputHint = document.getElementById("input-hint");
+  var btnAddWord = document.getElementById("btn-add-word");
 
   function setStatus(text, isError) {
     if (statusEl) {
@@ -65,6 +71,56 @@
       listEl.appendChild(li);
     });
   });
+
+  // Kelime havuzu dinle ve listele
+  wordsRef.on("value", function (snap) {
+    var data = snap.val() || {};
+    var ids = Object.keys(data);
+    wordListEl.innerHTML = "";
+    emptyWordsEl.style.display = ids.length ? "none" : "block";
+    ids.forEach(function (id) {
+      var w = data[id];
+      var word = (w && w.word) ? escapeHtml(w.word) : "—";
+      var hint = (w && w.hint) ? escapeHtml(w.hint) : "—";
+      var li = document.createElement("li");
+      li.innerHTML =
+        '<span class="name"><strong>' + word + '</strong> <span style="color:#888; font-weight:normal;">(' + hint + ')</span></span>';
+      var actions = document.createElement("span");
+      actions.className = "list-actions";
+      var btnDel = document.createElement("button");
+      btnDel.className = "btn btn-danger";
+      btnDel.textContent = "Sil";
+      btnDel.type = "button";
+      btnDel.onclick = function () {
+        wordsRef.child(id).remove();
+      };
+      actions.appendChild(btnDel);
+      li.appendChild(actions);
+      wordListEl.appendChild(li);
+    });
+  });
+
+  // Kelime ekle
+  btnAddWord.addEventListener("click", addWord);
+  inputWord.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); addWord(); }
+  });
+  inputHint.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); addWord(); }
+  });
+
+  function addWord() {
+    var word = (inputWord.value || "").trim();
+    var hint = (inputHint.value || "").trim();
+    if (!word) return;
+    wordsRef.push({ word: word, hint: hint }).then(function () {
+      inputWord.value = "";
+      inputHint.value = "";
+      inputWord.focus();
+    }).catch(function (err) {
+      alert("Eklenemedi: " + (err.message || err));
+    });
+  }
 
   function escapeHtml(s) {
     var div = document.createElement("div");

@@ -21,6 +21,17 @@
       <ul id="participant-list" class="participant-list"></ul>
       <p id="empty-list" class="empty-list">Henüz katılımcı yok. Katılımcılar giriş yaptığında burada listelenir.</p>
     </div>
+
+    <div class="card">
+      <h2>Kelime Havuzu</h2>
+      <div class="form-row">
+        <input type="text" id="input-word" placeholder="Kelime" maxlength="50">
+        <input type="text" id="input-hint" placeholder="İpucu" maxlength="100">
+        <button type="button" class="btn btn-primary" id="btn-add-word">Ekle</button>
+      </div>
+      <ul id="word-list" class="participant-list"></ul>
+      <p id="empty-words" class="empty-list">Henüz kelime yok. Yukarıdan kelime ve ipucu ekleyin.</p>
+    </div>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>

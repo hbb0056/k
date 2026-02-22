@@ -24,5 +24,6 @@ function initFirebase() {
   }
 }
 
-// Veritabanı yolu - yarışma katılımcıları
+// Veritabanı yolları
 const YARISMA_REF = "yarisma/participants";
+const KELIME_HAVUZU_REF = "yarisma/words";
