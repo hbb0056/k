@@ -21,6 +21,7 @@
   var ref = db.ref(YARISMA_REF);
   var wordsPath = typeof KELIME_HAVUZU_REF !== "undefined" ? KELIME_HAVUZU_REF : "yarisma/words";
   var wordsRef = db.ref(wordsPath);
+  var gameRef = db.ref(typeof YARISMA_GAME_REF !== "undefined" ? YARISMA_GAME_REF : "yarisma/currentGame");
 
   var statusEl = document.getElementById("connection-status");
   var listEl = document.getElementById("participant-list");
@@ -30,6 +31,11 @@
   var inputWord = document.getElementById("input-word");
   var inputHint = document.getElementById("input-hint");
   var btnAddWord = document.getElementById("btn-add-word");
+  var selectWord = document.getElementById("select-word");
+  var inputSeconds = document.getElementById("input-seconds");
+  var gameStatusText = document.getElementById("game-status-text");
+  var btnStartGame = document.getElementById("btn-start-game");
+  var btnEndGame = document.getElementById("btn-end-game");
 
 
   ref.once("value")
@@ -79,19 +85,23 @@
     });
   });
 
-  // Kelime havuzu dinle ve listele
+  // Kelime havuzu dinle, listele ve oyun için select doldur
   wordsRef.on("value", function (snap) {
     var data = snap.val() || {};
     var ids = Object.keys(data);
     wordListEl.innerHTML = "";
     emptyWordsEl.style.display = ids.length ? "none" : "block";
+    if (selectWord) {
+      selectWord.innerHTML = '<option value="">Kelime seçin</option>';
+    }
     ids.forEach(function (id) {
       var w = data[id];
-      var word = (w && w.word) ? escapeHtml(w.word) : "—";
-      var hint = (w && w.hint) ? escapeHtml(w.hint) : "—";
+      var word = (w && w.word) ? String(w.word).trim() : "";
+      var hint = (w && w.hint) ? String(w.hint).trim() : "";
+      if (!word) return;
       var li = document.createElement("li");
       li.innerHTML =
-        '<span class="name"><strong>' + word + '</strong> <span style="color:#888; font-weight:normal;">(' + hint + ')</span></span>';
+        '<span class="name"><strong>' + escapeHtml(word) + '</strong> <span style="color:#888; font-weight:normal;">(' + escapeHtml(hint) + ')</span></span>';
       var actions = document.createElement("span");
       actions.className = "list-actions";
       var btnDel = document.createElement("button");
@@ -104,6 +114,54 @@
       actions.appendChild(btnDel);
       li.appendChild(actions);
       wordListEl.appendChild(li);
+      if (selectWord) {
+        var opt = document.createElement("option");
+        opt.value = word;
+        opt.textContent = word + (hint ? " — " + hint : "");
+        selectWord.appendChild(opt);
+      }
+    });
+  });
+
+  // Oyun durumunu dinle
+  gameRef.on("value", function (snap) {
+    var g = snap.val() || {};
+    var status = g.status || "idle";
+    if (gameStatusText) {
+      if (status === "playing") gameStatusText.textContent = "Oyun devam ediyor. Katılımcılar kelimeyi tahmin ediyor.";
+      else if (status === "ended") gameStatusText.textContent = "Oyun bitti. Doğru kelime: " + (g.word || "—");
+      else gameStatusText.textContent = "Oyun yok.";
+    }
+    if (btnStartGame) btnStartGame.style.display = status === "playing" ? "none" : "block";
+    if (btnEndGame) btnEndGame.style.display = status === "playing" ? "block" : "none";
+  });
+
+  if (btnStartGame) btnStartGame.addEventListener("click", function () {
+    var word = selectWord && selectWord.value ? selectWord.value.trim() : "";
+    var sec = inputSeconds && inputSeconds.value ? Math.max(1, Math.min(60, parseInt(inputSeconds.value, 10) || 2)) : 2;
+    if (!word) {
+      alert("Lütfen havuzdan bir kelime seçin.");
+      return;
+    }
+    btnStartGame.disabled = true;
+    gameRef.set({
+      status: "playing",
+      word: word,
+      wordLength: word.length,
+      revealIntervalSeconds: sec,
+      startedAt: Date.now(),
+      guesses: {}
+    }).then(function () {
+      btnStartGame.disabled = false;
+    }).catch(function (err) {
+      btnStartGame.disabled = false;
+      alert("Başlatılamadı: " + (err.message || err));
+    });
+  });
+
+  if (btnEndGame) btnEndGame.addEventListener("click", function () {
+    gameRef.update({ status: "ended" }).catch(function (err) {
+      alert("Bitirilemedi: " + (err.message || err));
     });
   });
 

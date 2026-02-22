@@ -32,6 +32,21 @@
       <ul id="word-list" class="participant-list"></ul>
       <p id="empty-words" class="empty-list">Henüz kelime yok. Yukarıdan kelime ve ipucu ekleyin.</p>
     </div>
+
+    <div class="card">
+      <h2>Oyun</h2>
+      <p id="game-status-text" style="font-size: 0.9rem; color: #aaa; margin-bottom: 0.75rem;">Oyun yok.</p>
+      <div class="form-row">
+        <select id="select-word">
+          <option value="">Kelime seçin</option>
+        </select>
+        <input type="number" id="input-seconds" placeholder="Harf başı saniye" min="1" max="60" value="2" style="width: 7rem;">
+      </div>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+        <button type="button" class="btn btn-primary" id="btn-start-game">Oyunu Başlat</button>
+        <button type="button" class="btn btn-danger" id="btn-end-game" style="display: none;">Oyunu Bitir</button>
+      </div>
+    </div>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
