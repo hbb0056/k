@@ -1,16 +1,28 @@
 (function () {
-  if (typeof firebase === "undefined" || !firebase.apps?.length) {
-    document.getElementById("firebase-warning").style.display = "block";
-    document.getElementById("join-screen").style.display = "block";
+  var firebaseWarning = document.getElementById("firebase-warning");
+  var joinScreen = document.getElementById("join-screen");
+  if (typeof firebase === "undefined") {
+    if (firebaseWarning) firebaseWarning.style.display = "block";
+    if (joinScreen) joinScreen.style.display = "block";
     return;
   }
 
-  const db = firebase.database();
-  const gameRef = db.ref("games/" + GAME_ID);
-  const participantsRef = gameRef.child("participants");
-  const gameStateRef = gameRef.child("gameState");
+  var db, gameRef, participantsRef, gameStateRef;
+  try {
+    db = firebase.database();
+    if (typeof GAME_ID === "undefined") throw new Error("GAME_ID tanımlı değil.");
+    gameRef = db.ref("games/" + GAME_ID);
+    participantsRef = gameRef.child("participants");
+    gameStateRef = gameRef.child("gameState");
+  } catch (e) {
+    if (firebaseWarning) {
+      firebaseWarning.style.display = "block";
+      firebaseWarning.innerHTML = "<p>Bağlantı hatası: " + (e.message || e) + "</p><p>Siteyi sunucu üzerinden açın (npx serve . veya GitHub Pages).</p>";
+    }
+    if (joinScreen) joinScreen.style.display = "block";
+    return;
+  }
 
-  const joinScreen = document.getElementById("join-screen");
   const waitApprovalScreen = document.getElementById("wait-approval-screen");
   const notApprovedScreen = document.getElementById("not-approved-screen");
   const waitGameScreen = document.getElementById("wait-game-screen");
@@ -32,15 +44,20 @@
       alert("Lütfen bir isim girin.");
       return;
     }
-    const ref = participantsRef.push({
+    joinBtn.disabled = true;
+    participantsRef.push({
       name: name,
       status: "pending",
       joinedAt: Date.now()
+    }).then(function (ref) {
+      myParticipantId = ref.key;
+      localStorage.setItem("kelimeavi_participant_id", myParticipantId);
+      localStorage.setItem("kelimeavi_player_name", name);
+      showScreen("wait-approval");
+    }).catch(function (err) {
+      joinBtn.disabled = false;
+      alert("Katılım kaydedilemedi: " + (err.message || err) + "\n\nFirebase Realtime Database kurallarında games için read ve write true olmalı. Siteyi sunucu üzerinden açtığınızdan emin olun.");
     });
-    myParticipantId = ref.key;
-    localStorage.setItem("kelimeavi_participant_id", myParticipantId);
-    localStorage.setItem("kelimeavi_player_name", name);
-    showScreen("wait-approval");
   });
 
   // Sayfa yüklendiğinde daha önce katılmış mı kontrol et

@@ -1,18 +1,30 @@
 (function () {
-  if (window.location.protocol === "file:") {
-    document.getElementById("file-protocol-warning").style.display = "block";
+  var fileWarning = document.getElementById("file-protocol-warning");
+  var firebaseWarning = document.getElementById("firebase-warning");
+  if (fileWarning && window.location.protocol === "file:") {
+    fileWarning.style.display = "block";
   }
 
-  if (typeof firebase === "undefined" || !firebase.apps?.length) {
-    document.getElementById("firebase-warning").style.display = "block";
+  if (typeof firebase === "undefined") {
+    if (firebaseWarning) firebaseWarning.style.display = "block";
     return;
   }
 
-  const db = firebase.database();
-  const gameRef = db.ref("games/" + GAME_ID);
-  const participantsRef = gameRef.child("participants");
-  const wordsRef = gameRef.child("words");
-  const gameStateRef = gameRef.child("gameState");
+  var db, gameRef, participantsRef, wordsRef, gameStateRef;
+  try {
+    db = firebase.database();
+    if (typeof GAME_ID === "undefined") throw new Error("GAME_ID tanımlı değil. js/firebase-config.js yüklendi mi?");
+    gameRef = db.ref("games/" + GAME_ID);
+    participantsRef = gameRef.child("participants");
+    wordsRef = gameRef.child("words");
+    gameStateRef = gameRef.child("gameState");
+  } catch (e) {
+    if (firebaseWarning) {
+      firebaseWarning.style.display = "block";
+      firebaseWarning.innerHTML = "<p>Firebase bağlantısı kurulamadı: " + (e.message || e) + "</p><p>Siteyi <strong>sunucu üzerinden</strong> açın (örn. <code>npx serve .</code>).</p>";
+    }
+    return;
+  }
 
   const participantListEl = document.getElementById("participant-list");
   const participantEmptyEl = document.getElementById("participant-empty");
@@ -26,16 +38,19 @@
   const resetGameBtn = document.getElementById("reset-game-btn");
   const gameStatusEl = document.getElementById("game-status");
 
-  // Veritabanı bağlantısını test et ve katılımcıları ilk yükle
-  connectionStatusEl.textContent = "Veritabanına bağlanılıyor…";
+  if (connectionStatusEl) connectionStatusEl.textContent = "Veritabanına bağlanılıyor…";
   participantsRef.once("value")
     .then(function (snap) {
-      connectionStatusEl.textContent = "Veritabanı bağlı. Liste anlık güncellenir.";
-      connectionStatusEl.style.color = "var(--success)";
+      if (connectionStatusEl) {
+        connectionStatusEl.textContent = "Veritabanı bağlı. Liste anlık güncellenir.";
+        connectionStatusEl.style.color = "#22c55e";
+      }
     })
     .catch(function (err) {
-      connectionStatusEl.textContent = "Bağlantı hatası: " + (err.message || err);
-      connectionStatusEl.style.color = "var(--danger)";
+      if (connectionStatusEl) {
+        connectionStatusEl.textContent = "Bağlantı hatası: " + (err.message || err) + " — Realtime Database kurallarını kontrol edin.";
+        connectionStatusEl.style.color = "#ef4444";
+      }
     });
 
   // Başlangıçta gameState yoksa oluştur
