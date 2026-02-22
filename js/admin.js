@@ -10,21 +10,24 @@
     return;
   }
 
+  var GAME_ID = window.GAME_ID || "main";
   var db, gameRef, participantsRef, wordsRef, gameStateRef;
   try {
     db = firebase.database();
-    if (typeof GAME_ID === "undefined") throw new Error("GAME_ID tanımlı değil. js/firebase-config.js yüklendi mi?");
     gameRef = db.ref("games/" + GAME_ID);
     participantsRef = gameRef.child("participants");
     wordsRef = gameRef.child("words");
     gameStateRef = gameRef.child("gameState");
   } catch (e) {
+    var msg = "Firebase bağlantısı kurulamadı: " + (e.message || e);
+    if (window.KELIMEAVI_DEBUG) window.KELIMEAVI_DEBUG(msg);
     if (firebaseWarning) {
       firebaseWarning.style.display = "block";
-      firebaseWarning.innerHTML = "<p>Firebase bağlantısı kurulamadı: " + (e.message || e) + "</p><p>Siteyi <strong>sunucu üzerinden</strong> açın (örn. <code>npx serve .</code>).</p>";
+      firebaseWarning.innerHTML = "<p>" + msg + "</p><p>Siteyi <strong>sunucu üzerinden</strong> açın (örn. <code>npx serve .</code>).</p>";
     }
     return;
   }
+  if (window.KELIMEAVI_DEBUG) window.KELIMEAVI_DEBUG("Veritabanına bağlanılıyor…");
 
   const participantListEl = document.getElementById("participant-list");
   const participantEmptyEl = document.getElementById("participant-empty");
@@ -41,14 +44,17 @@
   if (connectionStatusEl) connectionStatusEl.textContent = "Veritabanına bağlanılıyor…";
   participantsRef.once("value")
     .then(function (snap) {
+      if (window.KELIMEAVI_DEBUG) window.KELIMEAVI_DEBUG("Veritabanı bağlı. Butonlar çalışır.");
       if (connectionStatusEl) {
         connectionStatusEl.textContent = "Veritabanı bağlı. Liste anlık güncellenir.";
         connectionStatusEl.style.color = "#22c55e";
       }
     })
     .catch(function (err) {
+      var errMsg = (err && err.message) || String(err);
+      if (window.KELIMEAVI_DEBUG) window.KELIMEAVI_DEBUG("HATA: " + errMsg);
       if (connectionStatusEl) {
-        connectionStatusEl.textContent = "Bağlantı hatası: " + (err.message || err) + " — Realtime Database kurallarını kontrol edin.";
+        connectionStatusEl.textContent = "Bağlantı hatası: " + errMsg + " — Realtime Database kurallarını kontrol edin.";
         connectionStatusEl.style.color = "#ef4444";
       }
     });

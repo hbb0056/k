@@ -7,21 +7,24 @@
     return;
   }
 
+  var GAME_ID = window.GAME_ID || "main";
   var db, gameRef, participantsRef, gameStateRef;
   try {
     db = firebase.database();
-    if (typeof GAME_ID === "undefined") throw new Error("GAME_ID tanımlı değil.");
     gameRef = db.ref("games/" + GAME_ID);
     participantsRef = gameRef.child("participants");
     gameStateRef = gameRef.child("gameState");
   } catch (e) {
+    var msg = "Bağlantı hatası: " + (e.message || e);
+    if (window.KELIMEAVI_DEBUG) window.KELIMEAVI_DEBUG(msg);
     if (firebaseWarning) {
       firebaseWarning.style.display = "block";
-      firebaseWarning.innerHTML = "<p>Bağlantı hatası: " + (e.message || e) + "</p><p>Siteyi sunucu üzerinden açın (npx serve . veya GitHub Pages).</p>";
+      firebaseWarning.innerHTML = "<p>" + msg + "</p><p>Siteyi sunucu üzerinden açın (npx serve . veya GitHub Pages).</p>";
     }
     if (joinScreen) joinScreen.style.display = "block";
     return;
   }
+  if (window.KELIMEAVI_DEBUG) window.KELIMEAVI_DEBUG("Hazır. İsim yazıp Katıl'a basın.");
 
   const waitApprovalScreen = document.getElementById("wait-approval-screen");
   const notApprovedScreen = document.getElementById("not-approved-screen");
@@ -53,10 +56,13 @@
       myParticipantId = ref.key;
       localStorage.setItem("kelimeavi_participant_id", myParticipantId);
       localStorage.setItem("kelimeavi_player_name", name);
+      if (window.KELIMEAVI_DEBUG) window.KELIMEAVI_DEBUG("Kayıt OK. Yönetici onayı bekleniyor.");
       showScreen("wait-approval");
     }).catch(function (err) {
       joinBtn.disabled = false;
-      alert("Katılım kaydedilemedi: " + (err.message || err) + "\n\nFirebase Realtime Database kurallarında games için read ve write true olmalı. Siteyi sunucu üzerinden açtığınızdan emin olun.");
+      var errMsg = (err && err.message) || String(err);
+      if (window.KELIMEAVI_DEBUG) window.KELIMEAVI_DEBUG("Yazma hatası: " + errMsg);
+      alert("Katılım kaydedilemedi: " + errMsg + "\n\nFirebase Realtime Database kurallarında games için read ve write true olmalı. Siteyi sunucu üzerinden açtığınızdan emin olun.");
     });
   });
 

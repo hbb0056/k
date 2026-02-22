@@ -1,0 +1,8 @@
+{
+  "name": "kelime-avi",
+  "version": "1.0.0",
+  "description": "Kelime Avı oyunu - Yönetici ve katılımcı",
+  "scripts": {
+    "start": "npx serve . -l 3000"
+  }
+}
