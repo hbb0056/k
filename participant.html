@@ -3,103 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kelime Avı - Katılımcı</title>
+  <title>Yarışma - Katılımcı</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <div class="container">
     <header style="margin-bottom: 1rem;">
-      <a href="index.html" class="btn btn-ghost" style="margin-bottom: 0.5rem;">← Ana sayfa</a>
-      <h1 style="font-size: 1.5rem; margin-top: 0.5rem;">Katılımcı Girişi</h1>
+      <a href="index.html" class="btn btn-secondary" style="padding: 0.5rem 0.75rem;">← Ana sayfa</a>
+      <h1 style="font-size: 1.35rem; margin-top: 0.5rem;">Katılımcı Girişi</h1>
     </header>
 
-    <div id="firebase-warning" class="card" style="display: none; border-color: var(--warning);">
-      <p>Firebase yapılandırması eksik. Lütfen yönetici ile iletişime geçin.</p>
-    </div>
+    <div id="error-msg" class="card msg msg-error" style="display: none;"></div>
 
-    <!-- Başvuru ekranı - varsayılan olarak görünür -->
-    <div id="join-screen" class="card">
-      <h2>Oyuna Katıl</h2>
-      <p class="text-muted" style="margin-bottom: 1rem; font-size: 0.95rem;">Adınızı yazıp <strong>Katıl</strong> butonuna basın. Yönetici sizi onayladıktan sonra oyuna gireceksiniz.</p>
+    <div id="screen-join" class="card">
+      <h2>Oyuna katıl</h2>
+      <p style="color: #aaa; margin-bottom: 1rem; font-size: 0.95rem;">Adınızı yazıp Giriş yapın. Yönetici onayladıktan sonra oyuna dahil olacaksınız.</p>
       <div class="form-row">
-        <input type="text" id="player-name" placeholder="Adınız" maxlength="30" autocomplete="name">
-        <button type="button" class="btn btn-primary" id="join-btn">Katıl</button>
+        <input type="text" id="input-name" placeholder="Adınız" maxlength="40" autocomplete="name">
+        <button type="button" class="btn btn-primary" id="btn-join">Giriş yap</button>
       </div>
     </div>
 
-    <!-- Onay bekliyor -->
-    <div id="wait-approval-screen" class="card" style="display: none;">
-      <div class="status-msg status-waiting">
-        Yönetici onayı bekleniyor. Listede görünüyorsunuz; onaylandığınızda oyun alanı açılacak.
+    <div id="screen-waiting" class="card" style="display: none;">
+      <div class="msg msg-waiting">
+        Yönetici onayı bekleniyor. Listede görünüyorsunuz; onaylandığınızda oyuna gireceksiniz.
       </div>
     </div>
 
-    <!-- Reddedildi / silindi -->
-    <div id="not-approved-screen" class="card" style="display: none;">
-      <div class="status-msg status-not-approved">
-        Henüz onaylanmadınız veya listeden çıkarıldınız. Tekrar katılmak için sayfayı yenileyin.
+    <div id="screen-approved" class="card" style="display: none;">
+      <div class="msg msg-success">
+        Onaylandınız. Oyuna giriş yaptınız.
       </div>
     </div>
-
-    <!-- Oyun beklemede (onaylı, oyun başlamadı) -->
-    <div id="wait-game-screen" class="card" style="display: none;">
-      <div class="status-msg status-playing">
-        Onaylandınız. Yönetici oyunu başlattığında kelime avı burada görünecek.
-      </div>
-    </div>
-
-    <!-- Oyun ekranı -->
-    <div id="game-screen" style="display: none;">
-      <div class="card">
-        <h2>Kelime Avı</h2>
-        <p class="text-muted" style="margin-bottom: 0.75rem;">Harfleri tıklayarak kelimeleri işaretleyin (baştan sona veya sondan başa).</p>
-        <div class="game-wrapper">
-          <div id="word-grid-container"></div>
-        </div>
-        <div class="found-words" id="found-words"></div>
-      </div>
-    </div>
-  </div>
-
-  <div id="debug-panel" class="card" style="margin-top: 1rem; font-size: 0.8rem; border-color: var(--border);">
-    <strong>Durum:</strong> <span id="debug-msg">yükleniyor…</span>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <script>
-    window.KELIMEAVI_DEBUG = function(msg) {
-      var el = document.getElementById("debug-msg");
-      if (el) el.textContent = msg;
-    };
-    (function() {
-      var config = {
-        apiKey: "AIzaSyBwzlkq9LZYCM_sk_M6tKfx5jme37Zw0u4",
-        authDomain: "kelime-avi-bec9f.firebaseapp.com",
-        databaseURL: "https://kelime-avi-bec9f-default-rtdb.firebaseio.com",
-        projectId: "kelime-avi-bec9f",
-        storageBucket: "kelime-avi-bec9f.firebasestorage.app",
-        messagingSenderId: "154681825331",
-        appId: "1:154681825331:web:7c8fec41e0d8ee2664eb46"
-      };
-      try {
-        if (typeof firebase !== "undefined") {
-          firebase.initializeApp(config);
-          window.GAME_ID = "main";
-          if (location.protocol === "file:") {
-            window.KELIMEAVI_DEBUG("UYARI: Dosya olarak açıldı! baslat.bat çalıştırıp http://localhost:3000 açın.");
-          } else {
-            window.KELIMEAVI_DEBUG("Firebase hazır. URL: " + location.href);
-          }
-        } else {
-          window.KELIMEAVI_DEBUG("HATA: Firebase SDK yüklenmedi.");
-        }
-      } catch (e) {
-        window.KELIMEAVI_DEBUG("HATA: " + (e.message || e));
-      }
-    })();
-  </script>
-  <script src="js/game-logic.js"></script>
+  <script src="js/firebase-config.js"></script>
   <script src="js/participant.js"></script>
 </body>
 </html>

@@ -1,7 +1,5 @@
 /**
- * Firebase yapılandırması
- * Bu dosyadaki değerleri kendi Firebase projenizden alıp doldurun.
- * Firebase Console: https://console.firebase.google.com
+ * Firebase yapılandırması - Online uygulama
  */
 const firebaseConfig = {
   apiKey: "AIzaSyBwzlkq9LZYCM_sk_M6tKfx5jme37Zw0u4",
@@ -13,9 +11,18 @@ const firebaseConfig = {
   appId: "1:154681825331:web:7c8fec41e0d8ee2664eb46"
 };
 
-if (firebaseConfig.apiKey) {
-  firebase.initializeApp(firebaseConfig);
+// Uygulama başlat (Firebase SDK yüklendikten sonra çağrılacak)
+function initFirebase() {
+  if (typeof firebase === "undefined") return null;
+  try {
+    firebase.initializeApp(firebaseConfig);
+    return firebase;
+  } catch (e) {
+    if (e.code === "app/duplicate-app" || (e.message && e.message.indexOf("already exists") !== -1)) return firebase;
+    console.error("Firebase init hatası:", e);
+    return null;
+  }
 }
 
-// Tek oda için sabit oyun ID (Realtime Database path)
-const GAME_ID = "main";
+// Veritabanı yolu - yarışma katılımcıları
+const YARISMA_REF = "yarisma/participants";
