@@ -9,9 +9,18 @@
 <body>
   <div class="container">
     <header style="margin-bottom: 1rem;">
-      <a href="index.html" class="btn btn-secondary" style="padding: 0.5rem 0.75rem;">← Ana sayfa</a>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
+        <a href="index.html" class="btn btn-secondary" style="padding: 0.5rem 0.75rem;">← Ana sayfa</a>
+        <a href="participant.html" class="btn btn-primary" style="padding: 0.5rem 0.75rem;">Katılımcı sayfası</a>
+      </div>
       <h1 style="font-size: 1.35rem; margin-top: 0.5rem;">Yönetici Paneli</h1>
     </header>
+
+    <div class="card" style="margin-bottom: 1rem; padding: 0.75rem 1rem;">
+      <p style="font-size: 0.9rem; color: #aaa; margin: 0;">
+        Katılımcılar bu adresten girer: <a href="participant.html" style="font-weight: 600;">participant.html</a> (aynı site adresinde <code style="background:#1a1a2e;padding:0.1rem 0.35rem;border-radius:4px;">/participant.html</code>)
+      </p>
+    </div>
 
     <div id="error-msg" class="card msg msg-error" style="display: none;"></div>
 
